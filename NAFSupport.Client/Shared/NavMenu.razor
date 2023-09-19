@@ -23,15 +23,13 @@
             </NavLink>
         </div>
         <div class="navItem px-3">
-            <NavLink class="nav-link" href="users">
+            <NavLink class="nav-link" href="/users">
                 Users
             </NavLink>
         </div>
         <div class="navItem px-3">
-            <NavLink class="nav-link" href="users">
-                <button class="nav-link" id="btn-logout" @onclick="ShowLogoutConfirmation">
-                    Logout
-                </button>
+            <NavLink class="nav-link" @onclick=@ShowLogoutConfirmation>
+                Logout
             </NavLink>
         </div>
     </nav>
