@@ -1,28 +1,28 @@
 ﻿@page "/users"
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
-
+@using System.Net.Http
         <button @onclick="ShowUserForm" id="btn-add">+Add User</button>
         <div class="filter_component">
             <div class="filter_department">
                 <label>Department</label>
                 <select class="userdepartment" @onchange="FilterbyDepartment">
                     <option value="">All</option>
-                    <option value="WPR">WPR</option>
-                    <option value="HR">HR</option>
-                    <option value="Engineering">Engineeering</option>
-                    <option value="Payroll">Payroll</option>
-                    <option value="QA">QA</option>
+                     @foreach (var department in departments)
+                     {
+                                  <option value="@department.departmentName">@department.departmentName</option>
+                     }
                 </select>
             </div>
             <div>
                 <label>Role</label>
                 <select class="userrole" @onchange="FilterbyRole">
                     <option value="">All</option>
-                    <option value="Department user">Department user</option>
-                    <option value="Department head">Department head</option>
-                    <option value="General user">General user</option>
-                </select>
+                     @foreach(var role in roles)
+                      {
+                            <option value="@role.roleName">@role.roleName</option>
+                      }
+        </select>
             </div>
     <SearchBox Items="users" OnSearch="UpdateFilteredUsers"></SearchBox>
         </div>
@@ -78,20 +78,73 @@
     private string selectedDepartment = "";
     private string selectedRole = "";
     protected List<UserDetails> filteredUsers = new();
+    private List<Department> departments = new List<Department>();
+    private List<Role> roles = new List<Role>();
 
     protected override async Task OnInitializedAsync()
     {
         await GetUserList();
         filteredUsers = users.ToList();
+        await FetchDepartmentsAsync();
+        await FetchRolesAsync();
+    }
+    private async Task FetchDepartmentsAsync()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://localhost:7017/get/department");
+                if (response.IsSuccessStatusCode)
+                {
+                    departments = await response.Content.ReadFromJsonAsync<List<Department>>();
+                }
+                else
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
+
+    private async Task FetchRolesAsync()
+    {
+        using(var httpClient = new HttpClient())
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://localhost:7017/get/role");
+                if(response.IsSuccessStatusCode)
+                {
+                    roles = await response.Content.ReadFromJsonAsync<List<Role>>();
+                }
+                else
+                {
+
+                }
+            }
+            catch(Exception ex)
+            {
+
+            }
+        }
     }
     private async Task FilterbyDepartment(ChangeEventArgs e)
     {
+        //var selectedDepartmentId = e.Value.ToString();
+        //var selectedDepartment = departments.FirstOrDefault(d => d.departmentRefId.ToString() == selectedDepartmentId);
         selectedDepartment = e.Value.ToString();
         StateHasChanged();
     }
     private async Task FilterbyRole(ChangeEventArgs e)
     {
+        //var selectedRoleId = e.Value.ToString();
+        //var selectedRole = roles.FirstOrDefault(r => r.roleId.ToString() == selectedRoleId);
         selectedRole = e.Value.ToString();
+
         StateHasChanged();
     }
     void UpdateFilteredUsers(string searchTerm)

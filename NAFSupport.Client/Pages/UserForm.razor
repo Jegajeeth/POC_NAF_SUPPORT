@@ -77,22 +77,20 @@
                 {
                     <select id="department" class="form-control" @bind="EditUser.department">
                         <option value="Select">Select</option>
-                        <option value="HR">HR</option>
-                        <option value="WPR">WPR</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Payroll">Payroll</option>
-                        <option value="QA">QA</option>
+                        @foreach (var department in departments)
+                        {
+                            <option value="@department.departmentName">@department.departmentName</option>
+                        }
                     </select>
                 }
                 else
                 {
                     <select id="department" class="form-control" @bind="newUser.department">
                         <option value="Select">Select</option>
-                        <option value="HR">HR</option>
-                        <option value="WPR">WPR</option>
-                        <option value="Engineering">Engineering</option>
-                        <option value="Payroll">Payroll</option>
-                        <option value="QA">QA</option>
+                        @foreach (var department in departments)
+                        {
+                            <option value="@department.departmentName">@department.departmentName</option>
+                        }
                     </select>
                     @if (formSubmitted && string.IsNullOrWhiteSpace(newUser.department))
                     {
@@ -106,18 +104,20 @@
                 {
                     <select id="role" class="form-control" @bind="EditUser.role">
                         <option value="Select">Select</option>
-                        <option value="Department head">Department head</option>
-                        <option value="Department user">Department user</option>
-                        <option value="General user">General user</option>
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role.roleName">@role.roleName</option>
+                        }
                     </select>
                 }
                 else
                 {
                     <select id="role" class="form-control" @bind="newUser.role">
                         <option value="Select">Select</option>
-                        <option value="Department head">Department head</option>
-                        <option value="Department user">Department user</option>
-                        <option value="General user">General user</option>
+                        @foreach (var role in roles)
+                        {
+                            <option value="@role.roleName">@role.roleName</option>
+                        }
                     </select>
                     @if (formSubmitted && string.IsNullOrWhiteSpace(newUser.role))
                     {
@@ -146,8 +146,10 @@
     public bool IsVisible { get; set; }
     private bool formSubmitted = false;
     private bool shouldCloseForm = true;
+    private List<Department> departments = new List<Department>();
+    private List<Role> roles = new List<Role>();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         if (EditUser != null)
         {
@@ -164,9 +166,54 @@
         {
             newUser = new UserDetails();
         }
+        await FetchDepartmentsAsync();
+        await FetchRolesAsync();
         StateHasChanged();
     }
+    private async Task FetchDepartmentsAsync()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://localhost:7017/get/department");
+                if (response.IsSuccessStatusCode)
+                {
+                    departments = await response.Content.ReadFromJsonAsync<List<Department>>();
+                }
+                else
+                {
+                }
+            }
+            catch (Exception ex)
+            {
 
+            }
+        }
+    }
+
+    private async Task FetchRolesAsync()
+    {
+        using (var httpClient = new HttpClient())
+        {
+            try
+            {
+                var response = await httpClient.GetAsync("https://localhost:7017/get/role");
+                if (response.IsSuccessStatusCode)
+                {
+                    roles = await response.Content.ReadFromJsonAsync<List<Role>>();
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+        }
+    }
     private bool IsValidEmail(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
