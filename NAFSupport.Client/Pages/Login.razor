@@ -1,0 +1,50 @@
+﻿@layout LoginLayout
+@page "/"
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+<div class="container-login">
+        <form class="form-login" @onsubmit="ValidateUser">
+            <h1 class="heading">Login Page</h1>
+            <input class="input-login" type="text" id="email" placeholder="username" @bind="email" required />
+            <input class="input-login" type="password" id="password" placeholder="password" @bind="password" required />
+            <button class="login-btn" type="submit">Submit</button>
+            @if (!string.IsNullOrEmpty(validationMessage))
+            {
+                <div class="alert alert-danger">@validationMessage</div>
+            }
+        </form>
+</div>
+
+@code {
+    private string email;
+    private string password;
+    private string validationMessage;
+
+    private async Task ValidateUser()
+    {
+        try
+        {
+            var apiUrl = $"https://localhost:7017/api/getuser?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
+            var response = await HttpClient.GetStringAsync(apiUrl);
+
+            if (!string.IsNullOrEmpty(response))
+            {
+
+                JS.InvokeAsync<string>("localStorage.setItem", "email", email);
+                JS.InvokeAsync<string>("localStorage.setItem", "password", password);
+                NavigationManager.NavigateTo("/users");
+            }
+            else
+            {
+                validationMessage = "Invalid username or password.";
+            }
+        }
+        catch (Exception ex)
+        {
+            validationMessage = "Invalid username or password";
+        }
+    }
+    
+}
+

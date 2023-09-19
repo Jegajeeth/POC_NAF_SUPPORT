@@ -1,0 +1,189 @@
+﻿@page "/users"
+@using NAFSupport.Shared.Models
+@inject HttpClient Http
+@using Newtonsoft.Json;
+@inject IJSRuntime JSRuntime
+        <button @onclick="ShowUserForm" id="btn-add">+Add User</button>
+        <div class="filter_component">
+            <div class="filter_department">
+                <label>Department</label>
+                <select class="userdepartment" @onchange="FilterbyDepartment">
+                    <option value="">All</option>
+                    <option value="WPR">WPR</option>
+                    <option value="HR">HR</option>
+                    <option value="Engineering">Engineeering</option>
+                    <option value="Payroll">Payroll</option>
+                    <option value="QA">QA</option>
+                </select>
+            </div>
+            <div>
+                <label>Role</label>
+                <select class="userrole" @onchange="FilterbyRole">
+                    <option value="">All</option>
+                    <option value="Department user">Department user</option>
+                    <option value="Department head">Department head</option>
+                    <option value="General user">General user</option>
+                </select>
+            </div>
+    <SearchBox Items="users" OnSearch="UpdateFilteredUsers"></SearchBox>
+        </div>
+        <div class="card-body">
+            @foreach (var user in filteredUsers)
+            {
+                @if ((string.IsNullOrWhiteSpace(selectedDepartment) || user.department == selectedDepartment) && (string.IsNullOrWhiteSpace(selectedRole) || user.role == selectedRole))
+                {
+                    <div class="card-container">
+                        <img src="https://static.vecteezy.com/system/resources/thumbnails/005/545/335/small/user-sign-icon-person-symbol-human-avatar-isolated-on-white-backogrund-vector.jpg"
+                             alt="Person"
+                             class="card-img" />
+                        <h5 class="card-title">@user.name - @user.userName</h5>
+                        <p class="card-text">Department: @user.department</p>
+                        <p class="card-text">Role: @user.role</p>
+                        <div class="card-icon">
+                            <button id="btn-edit" class="oi oi-pencil" @onclick="() => ShowEditUserForm(user)"></button>
+                            <button id="btn-delete" class="oi oi-trash" @onclick="() => ShowConfirmationDialog(user)"></button>
+                        </div>
+                    </div>
+                }
+
+            }
+            @if (isUserFormVisible)
+            {
+                <UserForm EditUser="editUser" IsVisible="IsVisible" OnUserAdded="HandleUserAdded" OnCloseForm="HideUserForm" GetUserList=@GetUserList />
+            }
+            @if (isConfirmationVisible)
+            {
+                <div class="confirmation-modal">
+                    <div class="modal-content">
+                        <span class="close-button" @onclick="HideConfirmationDialog">&times;</span>
+                        <h3>Confirmation</h3>
+                        <p>Are you sure you want to delete this user?</p>
+                        <div class="button-container">
+                            <button class="delete-button" @onclick="DeleteUser">Delete</button>
+                            <button class="cancel-button" @onclick="HideConfirmationDialog">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+@code {
+    [Parameter] public bool isAuthenticated { get; set; }
+    private List<UserDetails> users = new();
+    private bool isUserFormVisible = false;
+    private UserDetails userToDelete;
+    private bool isConfirmationVisible = false;
+    private UserDetails editUser;
+    [Parameter]
+    public bool IsVisible { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+    private string selectedDepartment = "";
+    private string selectedRole = "";
+    protected List<UserDetails> filteredUsers = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetUserList();
+        filteredUsers = users.ToList();
+    }
+    private async Task FilterbyDepartment(ChangeEventArgs e)
+    {
+        selectedDepartment = e.Value.ToString();
+        StateHasChanged();
+    }
+    private async Task FilterbyRole(ChangeEventArgs e)
+    {
+        selectedRole = e.Value.ToString();
+        StateHasChanged();
+    }
+    void UpdateFilteredUsers(string searchTerm)
+    {
+        if (string.IsNullOrEmpty(searchTerm))
+        {
+            filteredUsers = users.ToList();
+        }
+        else
+        {
+            filteredUsers = users.Where(x => x.userName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+    protected async Task GetUserList()
+    {
+        string apiUrl = "https://localhost:7017/get/users";
+        var response = await Http.GetAsync(apiUrl);
+        response.EnsureSuccessStatusCode();
+        string responseBodyJson = await response.Content.ReadAsStringAsync();
+
+        filteredUsers = JsonConvert.DeserializeObject<List<UserDetails>>(responseBodyJson);
+        users = filteredUsers;
+        Console.WriteLine(users.Count() +"ggg");
+        //StateHasChanged();
+    }
+    private void ShowUserForm()
+    {
+        editUser = null;
+        isUserFormVisible = true;
+        IsVisible = true; 
+    }
+
+    private void ShowEditUserForm(UserDetails user)
+    {
+        editUser = user;
+        isUserFormVisible = true;
+        IsVisible = true;
+        IsEditMode = true;
+    }
+
+    private void HideUserForm()
+    {
+        isUserFormVisible = false;
+    }
+    private void HandleUserAdded()
+    {
+        GetUserList();
+        HideUserForm();
+        StateHasChanged();
+    }
+    private void ShowConfirmationDialog(UserDetails user)
+    {
+        userToDelete = user;
+        isConfirmationVisible = true;
+    }
+
+    private void HideConfirmationDialog()
+    {
+        isConfirmationVisible = false;
+    }
+    private async Task DeleteUser()
+    {
+        if (userToDelete != null)
+        {
+            try
+            {
+                string apiUrl = $"https://localhost:7017/deleteUsers/{userToDelete.id}"; 
+                var response = await Http.DeleteAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string apiUrl1 = "https://localhost:7017/get/users";
+                    var response1 = await Http.GetAsync(apiUrl1);
+                    response1.EnsureSuccessStatusCode();
+                    string responseBodyJson = await response1.Content.ReadAsStringAsync();
+
+                    filteredUsers = JsonConvert.DeserializeObject<List<UserDetails>>(responseBodyJson);
+
+                }
+                else
+                {
+                    Console.WriteLine("Error deleting user: " + response.StatusCode);
+                }
+                HideConfirmationDialog();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting user: " + ex.Message);
+            }
+            StateHasChanged();
+        }
+    }
+
+}

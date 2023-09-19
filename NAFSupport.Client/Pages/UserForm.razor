@@ -1,0 +1,274 @@
+﻿@using NAFSupport.Shared.Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using Newtonsoft.Json;
+@inject IJSRuntime JSRuntime
+@using NAFSupport.Client.Pages
+@using System.Text.RegularExpressions;
+
+@if (IsVisible)
+{
+    <div class="user-form-modal">
+        <div class="user-form-content">
+            <span class="close-button" @onclick="CloseForm">&times;</span>
+            <h3>@(IsEditMode ? "Edit User" : "Add User")</h3>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                @if (EditUser != null)
+                {
+                    <input type="text" id="name" class="form-control" @bind="EditUser.name" />
+                }
+                else
+                {
+                    <input type="text" id="name" class="form-control" @bind="newUser.name" />
+                    @if (formSubmitted && string.IsNullOrWhiteSpace(newUser.name))
+                    {
+                        <div class="text-danger">Name is required</div>
+                    }
+                }
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                @if (EditUser != null)
+                {
+                    <input type="text" id="email" class="form-control" @bind="EditUser.email" />
+                }
+                else
+                {
+                    <input type="text" id="email" class="form-control" @bind="newUser.email" />
+                    @if (formSubmitted)
+                    {
+                        @if (string.IsNullOrWhiteSpace(newUser.email))
+                        {
+                            <div class="text-danger">Email is required</div>
+                        }
+                        else if (!IsValidEmail(newUser.email))
+                        {
+                            <div class="text-danger">Invalid email format</div>
+                        }
+                    }
+                }
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                @if (EditUser != null)
+                {
+                    <input type="password" id="password" class="form-control" @bind="EditUser.password" />
+                }
+                else
+                {
+                    <input type="password" id="password" class="form-control" @bind="newUser.password" />
+                    @if(formSubmitted)
+                    {
+                        @if(string.IsNullOrWhiteSpace(newUser.password))
+                        {
+                            <div class="text-danger">Password is required</div>
+                        }
+                        else if(!IsValidPassword(newUser.password))
+                        {
+                            <div class="text-danger">Password must contain uppercase,lowercase,one special character,one digit and minimum 8 characters</div>
+                        }
+                    }
+                }
+            </div>
+            <div class="form-group">
+                <label for="department">Department:</label>
+                @if(EditUser != null)
+                {
+                    <select id="department" class="form-control" @bind="EditUser.department">
+                        <option value="Select">Select</option>
+                        <option value="HR">HR</option>
+                        <option value="WPR">WPR</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Payroll">Payroll</option>
+                        <option value="QA">QA</option>
+                    </select>
+                }
+                else
+                {
+                    <select id="department" class="form-control" @bind="newUser.department">
+                        <option value="Select">Select</option>
+                        <option value="HR">HR</option>
+                        <option value="WPR">WPR</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Payroll">Payroll</option>
+                        <option value="QA">QA</option>
+                    </select>
+                    @if (formSubmitted && string.IsNullOrWhiteSpace(newUser.department))
+                    {
+                        <div class="text-danger">Department is required</div>
+                    }
+                }
+            </div>
+            <div class="form-group">
+                <label for="role">Role:</label>
+                @if(EditUser != null)
+                {
+                    <select id="role" class="form-control" @bind="EditUser.role">
+                        <option value="Select">Select</option>
+                        <option value="Department head">Department head</option>
+                        <option value="Department user">Department user</option>
+                        <option value="General user">General user</option>
+                    </select>
+                }
+                else
+                {
+                    <select id="role" class="form-control" @bind="newUser.role">
+                        <option value="Select">Select</option>
+                        <option value="Department head">Department head</option>
+                        <option value="Department user">Department user</option>
+                        <option value="General user">General user</option>
+                    </select>
+                    @if (formSubmitted && string.IsNullOrWhiteSpace(newUser.role))
+                    {
+                        <div class="text-danger">Role is required</div>
+                    }
+                }
+            </div>
+            <br/>
+            <button class="btn_save" @onclick="AddUser">@(IsEditMode ? "Update" : "Save")</button>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public Action OnUserAdded { get; set; }
+    [Parameter] public Action OnCloseForm { get; set; }
+    [Parameter] public Action OnUserUpdated { get; set; }
+    [Parameter]
+    public EventCallback GetUserList { get; set; }
+    private bool IsEditMode => EditUser != null;
+    [Parameter] public UserDetails EditUser { get; set; }
+    private UserDetails newUser;
+    private List<UserDetails> users = new();
+    [Parameter] 
+    public bool IsVisible { get; set; }
+    private bool formSubmitted = false;
+    private bool shouldCloseForm = true;
+
+    protected override void OnInitialized()
+    {
+        if (EditUser != null)
+        {
+            newUser = new UserDetails
+                {
+                    name = EditUser.name,
+                    email = EditUser.email,
+                    password = EditUser.password,
+                    department = EditUser.department,
+                    role = EditUser.role
+                };
+        }
+        else
+        {
+            newUser = new UserDetails();
+        }
+        StateHasChanged();
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return false;
+        }
+        string pattern = @"^[a-zA-Z0-9._%+-]+@gmail.com$";
+        return Regex.IsMatch(email, pattern);
+    }
+
+    private bool IsValidPassword(string password)
+    {
+        if(string.IsNullOrWhiteSpace(password))
+        {
+            return false;
+        }
+        string patternpassword = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@#$%^&+=])(?!.*\s).{8,}$";
+        return Regex.IsMatch(password, patternpassword);
+    }
+    private void CloseForm()
+    {
+        IsVisible = false;
+        OnCloseForm?.Invoke();
+
+        newUser = new UserDetails();
+        formSubmitted = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+         
+    private async Task AddUser()
+    {
+       formSubmitted = true;
+        try
+        {
+            if (IsEditMode)
+            {
+                    var updateResponse = await Http.PutAsJsonAsync($"https://localhost:7017/updateUsers/{EditUser.id}", EditUser);
+
+                    if (updateResponse.IsSuccessStatusCode)
+                    {
+
+                        OnUserUpdated?.Invoke();
+                        CloseForm();
+                        await GetUserList.InvokeAsync();
+                        InvokeAsync(StateHasChanged);
+                    }
+                    else
+                    {
+                        Console.WriteLine("API request failed while updating.");
+                    }
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(newUser.name) || string.IsNullOrWhiteSpace(newUser.email) || string.IsNullOrWhiteSpace(newUser.password) || string.IsNullOrWhiteSpace(newUser.department) || string.IsNullOrWhiteSpace(newUser.role))
+                {
+                    shouldCloseForm = false;
+                    return;
+                }
+                if (!IsValidEmail(newUser.email))
+                {
+                    shouldCloseForm = false;
+                    return;
+                }
+                if (!IsValidPassword(newUser.password))
+                {
+                    shouldCloseForm = false;
+                    return;
+                }
+                    var response = await Http.PostAsJsonAsync("https://localhost:7017/post/users", newUser);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        OnUserUpdated?.Invoke();
+                        CloseForm();
+                        await GetUserList.InvokeAsync();
+                        InvokeAsync(StateHasChanged);
+                    }
+                    else
+                    {
+                        Console.WriteLine("API request failed.");
+                    }
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            if (shouldCloseForm)
+            {
+                IsVisible = false;
+                OnCloseForm?.Invoke();
+            }
+        }
+    }
+
+}
+

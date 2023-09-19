@@ -1,0 +1,27 @@
+﻿button {
+    border: none;
+    background-color: white;
+    height: 52px;
+  
+    max-width: 50px;
+}
+
+input {  
+    border: none;
+    margin-top: 0px 10px;
+}
+    input:hover {
+        outline: none;
+        border: none;
+    }
+.search_class {
+    display: flex;
+    border-radius: 3px;
+    margin: 5px;
+    justify-content: center;
+    width: 350px;
+}
+
+.positionFix {
+    position: unset;
+}
