@@ -1,0 +1,135 @@
+﻿@page "/alltickets";
+@inject IApi api;
+
+@if(showPopup){
+    <TicketPopUp 
+        statusStr=@statusStr 
+        ticketDetails=@ticketToView 
+        popupMessage=@popupMessage 
+        showPopup=@showPopup 
+        showPopupChanged=@onClickCancel 
+        yesOptiontext=@yesButtonText 
+        onYes=@deleteTicket 
+     />
+}
+
+@if(showForm)
+{
+    <TicketForm toogleForm=@toogleForm onFormSubmit=@onFormSubmit />
+}
+
+@if (tickets != null && AllTicketStatus != null)
+{
+    <div class="createBtnCont">
+        <TicketBtn buttonContent="+ Create Ticket" handleClick=@onClickCreate />
+    </div>
+    <div class="tableheader">
+        <p @onclick=@(()=> {onStatusChange(0);}) class="@(activeStatus == 0 ? "activeStatus":"") status" >All</p>
+    @foreach(var i in AllTicketStatus)
+    {
+        <p @onclick=@(()=> {onStatusChange(i.Id);}) class="@(activeStatus == i.Id ? "activeStatus":"") status">@i.status</p>
+    }
+        <TicketDropdown @bind-value=@activeStatus dropdownContent=@AllTicketStatus />
+    </div>
+    <TicketTable onClickView=@onClickView onClickDelete=@onClickDelete tickets=@tickets ticketStatus=@AllTicketStatus />
+}
+else
+{
+    <p> Loading.... </p>
+}
+
+
+@code {
+    public IEnumerable<Ticket>? tickets;
+    public IEnumerable<TicketStatus>? AllTicketStatus;
+
+    public Boolean showPopup = false;
+    public Boolean showForm = false;
+
+    public string popupMessage = "pop Up";
+    public string yesButtonText = "";
+    public Ticket? ticketToBeDeleted;
+    public int activeStatus = 0;
+    public Ticket? ticketToView = null;
+    public string statusStr = "";
+
+    public void toogleForm()
+    {
+        showForm = !showForm;
+    }
+
+    public async void onFormSubmit(Ticket newTicket)
+    {
+        await api.PostTicket(newTicket);
+        tickets = await api.GetTicket();
+        toogleForm();
+        StateHasChanged();
+    }
+
+    public void onClickCreate()
+    {
+        toogleForm();
+    }
+
+    public void onClickView((Ticket viewTicket, string _statusStr) args)
+    {
+        ticketToView = args.viewTicket;
+        statusStr = args._statusStr;
+        showPopup = true;
+    }
+
+    public void onClickCancel()
+    {
+        showPopup = false;
+        ticketToBeDeleted = null;
+        yesButtonText = "";
+        ticketToView = null;
+        statusStr = "";
+    }
+
+    public async void deleteTicket()
+    {
+        if (ticketToBeDeleted != null) await api.DeleteTicket(ticketToBeDeleted.Id);
+        tickets = await api.GetTicket();
+        showPopup = false;
+        ticketToBeDeleted = null;
+        yesButtonText = "";
+        StateHasChanged();
+    }
+
+    public void onClickDelete(Ticket ticket)
+    {
+        popupMessage = $"Do you want to delete {ticket.ticketId} ticket";
+        showPopup = true;
+        yesButtonText = "Delete";
+        ticketToBeDeleted = ticket;
+    }
+
+    public void onStatusChange(int statusId)
+    {
+        activeStatus = statusId;
+    }
+
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+        if(AllTicketStatus == null) AllTicketStatus = await api.GetTicketStatus();
+        if(tickets == null) tickets = await api.GetTicket();
+        StateHasChanged();
+    }
+
+    public string getDate(string dateString)
+    {
+        DateTime date = Convert.ToDateTime(dateString);
+        return date.ToShortDateString();
+    }
+
+    public int getDue(string _startDate, string _endDate)
+    {
+        DateTime startDate = Convert.ToDateTime(_startDate);
+        DateTime endDate = Convert.ToDateTime(_endDate);
+        TimeSpan dueDate = endDate.Subtract(startDate);
+        return dueDate.Days;
+    }
+
+}

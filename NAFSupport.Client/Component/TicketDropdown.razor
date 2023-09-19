@@ -1,0 +1,38 @@
+﻿
+<div>
+    <div @onclick=toogleDropdown class="dropdownContainer">
+        <p>@(value == 0 ? "--select--" : dropdownContent?.First(x=>x.Id == value).status)</p>
+        <Icon Name="IconName.ChevronDown" />
+    </div>
+    @if (showDropdown && dropdownContent != null)
+    {
+        <div class="dropdownContent">
+        @foreach(var i in dropdownContent)
+        {
+            <p @onclick=@(async ()=> { await dropdownValueChange(i.Id); })>@i.status</p>
+        }
+        </div>    
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int value { get; set; }
+    [Parameter]
+    public IEnumerable<TicketStatus>? dropdownContent { get; set; }
+    [Parameter]
+    public EventCallback<int> valueChanged { get; set; }
+
+    public Boolean showDropdown = false;
+
+    public void toogleDropdown()
+    {
+        showDropdown = !showDropdown;    
+    }
+
+    public async Task dropdownValueChange(int i)
+    {
+        toogleDropdown(); 
+        await valueChanged.InvokeAsync(i);
+    }
+}

@@ -1,0 +1,36 @@
+﻿p{
+    font-size: 15px;
+    margin: 0;
+}
+
+th p{
+    font-size: 18px;
+}
+
+td {
+    padding: 15px;
+    border-right: 1px solid #e5e5e5;
+    border-left: 1px solid #e5e5e5;
+}
+
+th {
+    padding: 10px;
+    border-right: 1px solid #e5e5e5;
+    border-left: 1px solid #e5e5e5;
+}
+
+tr {
+    text-align: center;
+}
+
+table{
+    width: 100%;
+}
+
+tr:nth-child(2n) {
+    background-color: #d1d4e3;
+}
+
+.pressableIcons{
+    cursor: pointer;
+}

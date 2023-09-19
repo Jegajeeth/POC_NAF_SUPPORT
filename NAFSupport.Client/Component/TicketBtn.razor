@@ -1,0 +1,14 @@
+﻿
+<button class="bton" @onclick=btnClicked>@buttonContent</button>
+
+@code {
+    [Parameter]
+    public string buttonContent { set; get; } = " ";
+    [Parameter]
+    public EventCallback handleClick { set; get; }
+
+    public async Task btnClicked()
+    {
+        await handleClick.InvokeAsync();    
+    }
+}

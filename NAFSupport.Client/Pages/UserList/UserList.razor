@@ -1,8 +1,7 @@
 ﻿@page "/users"
-@using NAFSupport.Shared.Models
 @inject HttpClient Http
-@using Newtonsoft.Json;
 @inject IJSRuntime JSRuntime
+
         <button @onclick="ShowUserForm" id="btn-add">+Add User</button>
         <div class="filter_component">
             <div class="filter_department">

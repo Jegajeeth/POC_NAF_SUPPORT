@@ -1,8 +1,8 @@
-﻿@layout LoginLayout
-@page "/"
+﻿@page "/"
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+
 <div class="container-login">
         <form class="form-login" @onsubmit="ValidateUser">
             <h1 class="heading">Login Page</h1>
@@ -17,9 +17,23 @@
 </div>
 
 @code {
-    private string email;
-    private string password;
-    private string validationMessage;
+    private string? email;
+    private string? password;
+    private string? validationMessage;
+    private string? storedEmail;
+    private string? storedPassword;
+
+    protected async override void OnInitialized()
+    {
+        storedEmail = await JS.InvokeAsync<string>("localStorage.getItem", "email");
+        storedPassword = await JS.InvokeAsync<string>("localStorage.getItem", "password");
+
+        if(storedEmail != null)
+        {
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        base.OnInitialized();
+    }
 
     private async Task ValidateUser()
     {
@@ -31,9 +45,9 @@
             if (!string.IsNullOrEmpty(response))
             {
 
-                JS.InvokeAsync<string>("localStorage.setItem", "email", email);
-                JS.InvokeAsync<string>("localStorage.setItem", "password", password);
-                NavigationManager.NavigateTo("/users");
+                await JS.InvokeAsync<string>("localStorage.setItem", "email", email);
+                await JS.InvokeAsync<string>("localStorage.setItem", "password", password);
+                NavigationManager.NavigateTo("/dashboard");
             }
             else
             {

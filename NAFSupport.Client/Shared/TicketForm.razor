@@ -1,0 +1,58 @@
+﻿<div class="formPopupCont formFlexBox">
+    <div class="formPopupBox formFlexBox">
+        <h1>Create Ticket</h1>
+        <div class="formFlexBox formInputCont">
+            <TicketInput label="Created By" @bind-value=@createdBy />
+            <TicketInput label="Assigned To" @bind-value=@assignedTo />
+        </div>
+        <div class="formFlexBox formInputCont">
+            <TicketInput label="Start Date" type="date" @bind-value=@startDate />
+            <TicketInput label="End Date" type="date" @bind-value=@endDate />
+        </div>
+        <div class="formFlexBox formInputCont">
+            <TicketInput label="Priority" type="number" @bind-value=@priority/>
+            <TicketInput label="Severity" type="number" @bind-value=@severity/>
+        </div>
+        <div class="formFlexBox formBtnCont">
+            <button class="formBtn" @onclick=onCloseClick>Close</button>
+            <button class="formBtn active" @onclick=onSubmitClick>Submit</button>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public EventCallback toogleForm { get; set; }
+    [Parameter]
+    public EventCallback<Ticket> onFormSubmit { get; set; }
+
+    public string createdBy = "";
+    public string assignedTo = "";
+    public string startDate = "";
+    public string endDate = "";
+    public string priority = "";
+    public string severity = "";
+
+    public async Task onCloseClick()
+    {
+        await toogleForm.InvokeAsync();
+    }
+
+    public async Task onSubmitClick()
+    {
+
+        if (createdBy != "" && assignedTo != "" && startDate != "" && priority != "" && endDate != "" && severity != "")
+        {
+            Ticket newTicket = new Ticket();
+            newTicket.priority = Convert.ToInt32(priority);
+            newTicket.severity = Convert.ToInt32(severity);
+            newTicket.startDate = startDate;
+            newTicket.endDate = endDate;
+            newTicket.assignedBy = assignedTo;
+            newTicket.createdBy = createdBy;
+            newTicket.status = 1;
+            await onFormSubmit.InvokeAsync(newTicket);
+        }
+
+    }
+
+}

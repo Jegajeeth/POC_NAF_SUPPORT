@@ -1,0 +1,122 @@
+﻿<table>
+        <tr>
+            <th>
+                <p>TicketRefNum</p>
+            </th>
+            <th>
+                <p>Created By</p>
+            </th>
+            <th>
+                <p>Assigned to</p>
+            </th>
+            <th>
+                <p>Status</p>
+            </th>
+            <th>
+                <p>Start Date</p>
+            </th>
+            <th>
+                <p>End Date</p>
+            </th>
+            <th>
+                <p>Priority</p>
+            </th>
+            <th>
+                <p>Severity</p>
+            </th>
+            <th>
+                <p>Due By</p>
+            </th>
+            <th>
+                <p>View</p>
+            </th>
+            <th>
+                <p>Delete</p>
+            </th>
+        </tr>
+@foreach (Ticket i in tickets)
+{
+    <tr>
+        <td>
+            <p>@i.ticketId</p>
+        </td>
+        <td>
+            <p>@i.createdBy</p>
+        </td>
+        <td>
+            <p>@i.assignedBy</p>
+        </td>
+        <td>
+            <p>@getStatus(i.status)</p>
+        </td>
+        <td>
+            <p>@getDate(i.startDate)</p>
+        </td>
+        <td>
+            <p>@getDate(i.endDate)</p>
+        </td>
+        <td>
+            <p>@i.priority</p>
+        </td>
+        <td>
+            <p>@i.severity</p>
+        </td>
+        <td>
+            <p>@getDue(i.startDate, i.endDate)</p>
+        </td>
+        <td>
+                <p @onclick=@(async () => { await viewTicket(i);}) class="pressableIcons"><Icon Name="IconName.InfoCircleFill" /></p>
+        </td>
+        <td>
+                <p @onclick=@(async () => { await deleteTicket(i);}) class="pressableIcons"><Icon Name="IconName.Trash" /></p>
+        </td>
+    </tr>
+}
+</table>
+
+@code {
+
+    [Parameter]
+    public IEnumerable<Ticket>? tickets { set; get; }
+    [Parameter]
+    public IEnumerable<TicketStatus>? ticketStatus { set; get; }
+    [Parameter]
+    public EventCallback<Ticket> onClickDelete { set; get; }
+    [Parameter]
+    public EventCallback<(Ticket,string)> onClickView { set; get; }
+
+    public string getDate(string dateString)
+    {
+        DateTime date = Convert.ToDateTime(dateString);
+        return date.ToShortDateString();
+    }
+
+    public string getStatus(int id)
+    {
+        TicketStatus? status =  ticketStatus.First(x => x.Id == id);
+
+        if (status != null) return status.status;
+
+        return null;
+    }
+
+    public async Task deleteTicket(Ticket ticket)
+    {
+        await onClickDelete.InvokeAsync(ticket);
+    }
+
+    public async Task viewTicket(Ticket ticket)
+    {
+        string statusStr = getStatus(ticket.status);
+        await onClickView.InvokeAsync((ticket, statusStr));
+    }
+
+    public int getDue(string _startDate, string _endDate)
+    {
+        DateTime startDate = Convert.ToDateTime(_startDate);
+        DateTime endDate = Convert.ToDateTime(_endDate);
+        TimeSpan dueDate = endDate.Subtract(startDate);
+        return dueDate.Days;
+    }
+
+}

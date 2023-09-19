@@ -1,0 +1,57 @@
+﻿
+<div class="popupCont">
+    <div class="popupBox">
+        @if (ticketDetails != null)
+        {
+            <h1>Ticket Details</h1>
+            <p>TicketId: @ticketDetails.ticketId</p>
+            <p>Created By: @ticketDetails.createdBy</p>
+            <p>Assigned By: @ticketDetails.assignedBy</p>
+            <p>Status:  @((statusStr != "") ? statusStr : ticketDetails.status)</p>
+            <p>Start date: @ticketDetails.startDate</p>
+            <p>End date: @ticketDetails.endDate</p>
+            <p>Priority: @ticketDetails.priority</p>
+            <p>Severity: @ticketDetails.severity</p>
+
+        }
+        else
+        {
+            <p>@popupMessage</p>
+        }
+        <div class="popupBtnCont">
+            <button class="popupBtn" @onclick=@closePopup>cancel</button>
+            @if (yesOptiontext != null && yesOptiontext != "")
+            {
+                <button class="popupBtn active" @onclick=@onYesPressed>@yesOptiontext</button>
+            }
+
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string popupMessage { get; set; } = "";
+    [Parameter]
+    public Boolean showPopup { get; set; }
+    [Parameter]
+    public EventCallback<Boolean> showPopupChanged { get; set; }
+    [Parameter]
+    public EventCallback onYes { get; set; }
+    [Parameter]
+    public string? yesOptiontext { get; set; }
+    [Parameter]
+    public Ticket ticketDetails { get; set; } = null;
+    [Parameter]
+    public string? statusStr { get; set; } = "";
+
+    public async Task closePopup()
+    {
+        await showPopupChanged.InvokeAsync(false);
+    }
+
+    public async Task onYesPressed()
+    {
+        await onYes.InvokeAsync();
+    }
+}

@@ -6,10 +6,15 @@
 
 main {
     flex: 1;
+    background-color: #EEF0F4;
+}
+
+article{
+    padding: 0;
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-color: #091644;
 }
 
 .top-row {
@@ -48,11 +53,19 @@ main {
     .top-row ::deep a, .top-row ::deep .btn-link {
         margin-left: 0;
     }
+
+    article {
+        padding: 0;
+    }
 }
 
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
+    }
+
+    article {
+        padding: 0;
     }
 
     .sidebar {
@@ -74,8 +87,4 @@ main {
         width: 0;
     }
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
 }

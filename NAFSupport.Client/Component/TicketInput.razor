@@ -1,0 +1,27 @@
+﻿
+<div>
+    @if (label != "" && label != null)
+    {
+        <p>@label</p>
+    }
+    <input class="formInputBox" type=@type value=@value placeholder=@placeHolder @oninput=onValueChange />
+</div>
+
+@code {
+    [Parameter]
+    public string value { get; set; } = "";
+    [Parameter]
+    public EventCallback<string> valueChanged { get; set; }
+    [Parameter]
+    public string type { get; set; } = "text";
+    [Parameter]
+    public string label { get; set; } = "";
+    [Parameter]
+    public string placeHolder { get; set; } = "Enter the value";
+
+    public async Task onValueChange(ChangeEventArgs e)
+    {
+        await valueChanged.InvokeAsync(e?.Value?.ToString());
+    }
+
+}

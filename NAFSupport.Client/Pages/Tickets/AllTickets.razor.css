@@ -1,0 +1,34 @@
+﻿.createBtnCont{
+    display: flex;
+    align-content: center;
+    justify-content: flex-end;
+    padding: 15px 10px;
+}
+
+.tableheader {
+    background-color: #091644;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 30px;
+    margin-bottom: 5px;
+}
+
+    .tableheader p {
+        cursor: pointer;
+    }
+
+.tableheader p{
+    color: #fff;
+    margin: 0;
+}
+
+.activeStatus {
+    background-color: rgba(255,255,255,0.25);
+    padding: 5px 15px;
+    border-radius: 5px;
+}
+
+.status {
+    padding: 5px 15px;
+}

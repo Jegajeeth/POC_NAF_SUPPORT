@@ -1,0 +1,59 @@
+﻿@page "/dashboard";
+@inject IApi api;
+
+<h1>Welcome To Dashboard</h1>
+<div class="barChartCont">
+    <BarChart @ref="barChart" Class="mb-4" />
+</div>
+
+@code {
+    public IEnumerable<Ticket>? tickets;
+    public IEnumerable<TicketStatus>? AllTicketStatus;
+
+    public List<IChartDataset>? chartDataset = new List<IChartDataset>();
+    public List<string>? chartLabels = new List<string>();
+    public BarChart barChart = new BarChart();
+    public ChartData chartData = new ChartData();
+    private BarChartOptions barChartOptions = new BarChartOptions();
+
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (tickets == null) tickets = await api.GetTicket();
+        if (AllTicketStatus == null) AllTicketStatus = await api.GetTicketStatus();
+        getDataset();
+        chartData = new ChartData { Datasets = chartDataset, Labels = chartLabels };
+        barChartOptions = new BarChartOptions { Responsive = true, Interaction = new Interaction { Mode = InteractionMode.Index } };
+        await barChart.UpdateAsync(chartData, barChartOptions);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await barChart.InitializeAsync(chartData, barChartOptions);
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+
+    public void getDataset()
+    {
+        if(AllTicketStatus != null && tickets != null)
+        {
+            List<double> countList = new List<double>();
+            foreach(var i in AllTicketStatus)
+            {
+                int count = 0;
+                foreach(var ticket in tickets)
+                {
+                    if (ticket.status == i.Id) count += 1;
+                }
+                chartLabels?.Add(i.status);
+                countList.Add(count);
+                count = 0;
+            }
+            chartDataset?.Add(new BarChartDataset{ Data = countList, Label = "No of Tickets" });
+        }
+    }
+}
