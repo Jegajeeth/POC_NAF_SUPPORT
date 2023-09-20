@@ -14,8 +14,8 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddBlazorBootstrap();
 
-builder.Services.AddSingleton(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7017/") });
-builder.Services.AddSingleton<IApi, Api>();
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7017/") });
+builder.Services.AddScoped<IApi, Api>();
 
 await builder.Build().RunAsync();
 

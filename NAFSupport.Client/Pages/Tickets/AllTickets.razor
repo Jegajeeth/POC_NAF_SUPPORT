@@ -1,5 +1,6 @@
 ﻿@page "/alltickets";
 @inject IApi api;
+@inject IJSRuntime JS;
 
 @if(showPopup){
     <TicketPopUp 
@@ -56,6 +57,14 @@ else
     public Ticket? ticketToView = null;
     public string statusStr = "";
 
+    protected async override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (AllTicketStatus == null) AllTicketStatus = await api.GetTicketStatus();
+        if (tickets == null) tickets = await api.GetTicket();
+        StateHasChanged();
+    }
+
     public void toogleForm()
     {
         showForm = !showForm;
@@ -111,14 +120,6 @@ else
     public void onStatusChange(int statusId)
     {
         activeStatus = statusId;
-    }
-
-    protected async override void OnInitialized()
-    {
-        base.OnInitialized();
-        if(AllTicketStatus == null) AllTicketStatus = await api.GetTicketStatus();
-        if(tickets == null) tickets = await api.GetTicket();
-        StateHasChanged();
     }
 
     public string getDate(string dateString)

@@ -57,12 +57,10 @@
     private string modalDisplay = "none";
 
     public string? storedEmail;
-    private string? storedPassword;
 
     protected async override void OnInitialized()
     {
         storedEmail = await JS.InvokeAsync<string>("localStorage.getItem", "email");
-        storedPassword = await JS.InvokeAsync<string>("localStorage.getItem", "password");
         if (storedEmail == null) NavigationManager.NavigateTo("/");
         base.OnInitialized();
     }
@@ -77,7 +75,7 @@
     {
         modalDisplay = "none"; 
         await JS.InvokeVoidAsync("localStorage.removeItem", "email");
-        await JS.InvokeVoidAsync("localStorage.removeItem", "password");
+        await JS.InvokeVoidAsync("localStorage.removeItem", "userName");
         NavigationManager.NavigateTo("/");
     }
 

@@ -1,8 +1,10 @@
-﻿<div class="formPopupCont formFlexBox">
+﻿@inject IJSRuntime JS
+
+<div class="formPopupCont formFlexBox">
     <div class="formPopupBox formFlexBox">
         <h1>Create Ticket</h1>
         <div class="formFlexBox formInputCont">
-            <TicketInput label="Created By" @bind-value=@createdBy />
+            <TicketInput isDisabled=true label="Created By" @bind-value=@createdBy />
             <TicketInput label="Assigned To" @bind-value=@assignedTo />
         </div>
         <div class="formFlexBox formInputCont">
@@ -31,6 +33,13 @@
     public string endDate = "";
     public string priority = "";
     public string severity = "";
+
+    protected override async void OnInitialized()
+    {
+        createdBy = await JS.InvokeAsync<string>("localStorage.getItem", "userName");
+        StateHasChanged();
+        base.OnInitialized();
+    }
 
     public async Task onCloseClick()
     {

@@ -4,7 +4,7 @@
     {
         <p>@label</p>
     }
-    <input class="formInputBox" type=@type value=@value placeholder=@placeHolder @oninput=onValueChange />
+    <input disabled=@isDisabled class="formInputBox" type=@type value=@value placeholder=@placeHolder @oninput=onValueChange />
 </div>
 
 @code {
@@ -18,6 +18,8 @@
     public string label { get; set; } = "";
     [Parameter]
     public string placeHolder { get; set; } = "Enter the value";
+    [Parameter]
+    public Boolean isDisabled { get; set; } = false;
 
     public async Task onValueChange(ChangeEventArgs e)
     {

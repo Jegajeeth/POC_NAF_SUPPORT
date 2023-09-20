@@ -1,7 +1,8 @@
 ﻿@page "/dashboard";
 @inject IApi api;
+@inject IJSRuntime JS
 
-<h1>Welcome To Dashboard</h1>
+<h1>Welcome @userName To Dashboard</h1>
 <div class="barChartCont">
     <BarChart @ref="barChart" Class="mb-4" />
 </div>
@@ -16,15 +17,20 @@
     public ChartData chartData = new ChartData();
     private BarChartOptions barChartOptions = new BarChartOptions();
 
+    public string userName = "";
+
     protected async override void OnInitialized()
     {
-        base.OnInitialized();
         if (tickets == null) tickets = await api.GetTicket();
         if (AllTicketStatus == null) AllTicketStatus = await api.GetTicketStatus();
         getDataset();
         chartData = new ChartData { Datasets = chartDataset, Labels = chartLabels };
         barChartOptions = new BarChartOptions { Responsive = true, Interaction = new Interaction { Mode = InteractionMode.Index } };
         await barChart.UpdateAsync(chartData, barChartOptions);
+
+        userName = await JS.InvokeAsync<string>("localStorage.getItem", "userName");
+        StateHasChanged();
+        base.OnInitialized();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

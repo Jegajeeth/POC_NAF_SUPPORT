@@ -17,16 +17,14 @@
 </div>
 
 @code {
-    private string? email;
-    private string? password;
+    private string email = "";
+    private string password = "";
     private string? validationMessage;
     private string? storedEmail;
-    private string? storedPassword;
 
     protected async override void OnInitialized()
     {
         storedEmail = await JS.InvokeAsync<string>("localStorage.getItem", "email");
-        storedPassword = await JS.InvokeAsync<string>("localStorage.getItem", "password");
 
         if(storedEmail != null)
         {
@@ -39,14 +37,14 @@
     {
         try
         {
+
             var apiUrl = $"https://localhost:7017/api/getuser?email={Uri.EscapeDataString(email)}&password={Uri.EscapeDataString(password)}";
-            var response = await HttpClient.GetStringAsync(apiUrl);
+            UserDetails? res = await HttpClient.GetFromJsonAsync<UserDetails>(apiUrl);
 
-            if (!string.IsNullOrEmpty(response))
+            if (res != null)
             {
-
-                await JS.InvokeAsync<string>("localStorage.setItem", "email", email);
-                await JS.InvokeAsync<string>("localStorage.setItem", "password", password);
+                await JS.InvokeAsync<string>("localStorage.setItem", "userName", res.userName);
+                await JS.InvokeAsync<string>("localStorage.setItem", "email", res.email);
                 NavigationManager.NavigateTo("/dashboard");
             }
             else
