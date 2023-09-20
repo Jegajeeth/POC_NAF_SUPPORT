@@ -1,4 +1,5 @@
-﻿<table>
+﻿
+    <table>
         <tr>
             <th>
                 <p>TicketRefNum</p>
@@ -34,7 +35,7 @@
                 <p>Delete</p>
             </th>
         </tr>
-@foreach (Ticket i in tickets)
+@foreach (Ticket i in tickets.Where(ticket => activeStatus == 0 || ticket.status == activeStatus))
 {
     <tr>
         <td>
@@ -84,6 +85,8 @@
     public EventCallback<Ticket> onClickDelete { set; get; }
     [Parameter]
     public EventCallback<(Ticket,string)> onClickView { set; get; }
+    [Parameter]
+    public int activeStatus { get; set; }
 
     public string getDate(string dateString)
     {

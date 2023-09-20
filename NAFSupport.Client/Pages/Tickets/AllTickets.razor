@@ -31,7 +31,8 @@
     }
         <TicketDropdown @bind-value=@activeStatus dropdownContent=@AllTicketStatus />
     </div>
-    <TicketTable onClickView=@onClickView onClickDelete=@onClickDelete tickets=@tickets ticketStatus=@AllTicketStatus />
+    <TicketTable onClickView=@onClickView onClickDelete=@onClickDelete tickets=@tickets ticketStatus=@AllTicketStatus activeStatus=@activeStatus />
+
 }
 else
 {
@@ -49,7 +50,9 @@ else
     public string popupMessage = "pop Up";
     public string yesButtonText = "";
     public Ticket? ticketToBeDeleted;
+
     public int activeStatus = 0;
+
     public Ticket? ticketToView = null;
     public string statusStr = "";
 
