@@ -1,10 +1,8 @@
 ﻿@typeparam TEntity
 
 <div class="search_class">
-        <input placeholder="Search..."
-        @bind="searchItem" />
-        <button class="oi oi-magnifying-glass positionFix"
-        @onclick=OnSearchClicked></button>
+    <input placeholder="Search..." @bind="searchItem" @oninput="OnSearchTextChanged"><i class="fa-solid fa-magnifying-glass"></i></input>
+    <i class="fa-solid fa-magnifying-glass"></i>
 </div>
 @code {
     [Parameter]
@@ -15,9 +13,10 @@
 
     private string searchItem;
 
-    private async Task OnSearchClicked()
+    private async Task OnSearchTextChanged(ChangeEventArgs e)
     {
+        searchItem = e.Value.ToString();
         await OnSearch.InvokeAsync(searchItem);
     }
-
 }
+

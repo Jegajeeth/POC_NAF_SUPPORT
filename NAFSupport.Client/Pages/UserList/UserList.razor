@@ -2,6 +2,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 @using System.Net.Http
+
         <button @onclick="ShowUserForm" id="btn-add">+Add User</button>
         <div class="filter_component">
             <div class="filter_department">
@@ -80,6 +81,8 @@
     protected List<UserDetails> filteredUsers = new();
     private List<Department> departments = new List<Department>();
     private List<Role> roles = new List<Role>();
+     private string searchTerm = "";
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -149,14 +152,25 @@
     }
     void UpdateFilteredUsers(string searchTerm)
     {
-        if (string.IsNullOrEmpty(searchTerm))
-        {
-            filteredUsers = users.ToList();
-        }
-        else
-        {
-            filteredUsers = users.Where(x => x.userName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
+        this.searchTerm = searchTerm;
+        FilterUsers();
+        //if (string.IsNullOrEmpty(searchTerm))
+        //{
+          //  filteredUsers = users.ToList();
+        //}
+        //else
+        //{
+          //  filteredUsers = users.Where(x => x.userName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        //}
+    }
+    private void FilterUsers()
+    {
+        filteredUsers = users
+            .Where(user =>
+                (string.IsNullOrWhiteSpace(selectedDepartment) || user.department == selectedDepartment) &&
+                (string.IsNullOrWhiteSpace(selectedRole) || user.role == selectedRole) &&
+                (string.IsNullOrWhiteSpace(searchTerm) || user.userName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
     }
     protected async Task GetUserList()
     {
@@ -167,6 +181,7 @@
 
         filteredUsers = JsonConvert.DeserializeObject<List<UserDetails>>(responseBodyJson);
         users = filteredUsers;
+        FilterUsers();
         Console.WriteLine(users.Count() +"ggg");
         //StateHasChanged();
     }

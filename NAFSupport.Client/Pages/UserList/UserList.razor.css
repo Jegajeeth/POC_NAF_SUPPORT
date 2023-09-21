@@ -8,7 +8,7 @@
     border: #3B6CCF;
 }
 .card-container {
-    height: 140px;
+    height: 150px;
     width: 335px;
     font-size: 14px;
     line-height: 8px;
@@ -32,6 +32,13 @@
     flex-direction: row;
     margin-right: 13px;
     margin-top: 0px;
+}
+.card-title {
+    COLOR: #3B6CCF;
+}
+.card-text {
+    margin: 15px;
+    line-height: 10px;
 }
 #btn-delete {
     outline: none;

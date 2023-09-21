@@ -6,20 +6,25 @@
     max-width: 50px;
 }
 
-input {  
+input {
     border: none;
-    margin-top: 0px 10px;
+    padding: 10px;
+    margin-top: -5px;
+    padding-left: 30px;
 }
     input:hover {
         outline: none;
         border: none;
     }
-.search_class {
-    display: flex;
-    border-radius: 3px;
-    margin: 5px;
-    justify-content: center;
-    width: 350px;
+.search_class {  
+    position: relative;
+}
+
+.search_class i {
+    position: absolute;
+    top: 50%;
+    left: 10px; /* Adjust the left position to align the icon properly */
+    transform: translate(0, -50%);
 }
 
 .positionFix {
